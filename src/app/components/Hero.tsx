@@ -31,7 +31,7 @@ export function Hero() {
         <h1
           className="text-4xl sm:text-5xl md:text-6xl mb-8 text-slate-50 leading-tight"
           style={{ fontFamily: 'Crimson Pro, serif', letterSpacing: '0.02em' }}
-        >Unlock New Capital Markets for Your Mining Assets</h1>
+        >Enabling the constellation of digital asset markets</h1>
         <p className="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">Starlight digitizes royalties, mineral resources, and other real world assets. Our patent pending on-chain compliance auditing system enables a new constellation of regulatory compliant tokenized securities.</p>
       </div>
     </section>
