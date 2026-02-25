@@ -1,6 +1,7 @@
 import { Mail, MapPin, Phone, CheckCircle2 } from 'lucide-react';
 import { useState } from 'react';
-import { projectId, publicAnonKey } from '/utils/supabase/info';
+import { projectId, publicAnonKey } from '../../../utils/supabase/info';
+import { supabase, isSupabaseConfigured } from '../../utils/supabaseClient';
 
 export function Contact() {
   const [formData, setFormData] = useState({
@@ -15,34 +16,55 @@ export function Contact() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
     // Basic validation
     if (!formData.name || !formData.email || !formData.message) {
       setError('Please fill in all fields');
       return;
     }
-    
+
     setSubmitting(true);
-    
+
     try {
-      const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-1da2e686/submit-contact`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${publicAnonKey}`,
-          },
-          body: JSON.stringify(formData),
-        }
-      );
-      
-      if (response.ok) {
-        setSubmitted(true);
+      let isSuccess = false;
+
+      if (isSupabaseConfigured) {
+        const { error: dbError } = await supabase
+          .from('contacts')
+          .insert([
+            {
+              name: formData.name,
+              email: formData.email,
+              message: formData.message,
+            }
+          ]);
+
+        if (dbError) throw dbError;
+        isSuccess = true;
       } else {
-        const errorData = await response.json();
-        setError('Failed to send message. Please try again.');
-        console.error('Failed to submit contact form:', errorData);
+        const response = await fetch(
+          `https://${projectId}.supabase.co/functions/v1/make-server-1da2e686/submit-contact`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${publicAnonKey}`,
+            },
+            body: JSON.stringify(formData),
+          }
+        );
+
+        if (response.ok) {
+          isSuccess = true;
+        } else {
+          const errorData = await response.json();
+          console.error('Failed to submit contact form:', errorData);
+          throw new Error('Failed to send message');
+        }
+      }
+
+      if (isSuccess) {
+        setSubmitted(true);
       }
     } catch (err) {
       setError('Network error. Please check your connection.');
@@ -63,14 +85,14 @@ export function Contact() {
     <section className="w-full py-16 px-4">
       <div className="container mx-auto max-w-4xl">
         <div className="text-center mb-12">
-          <h1 
+          <h1
             className="text-4xl sm:text-5xl mb-6 text-slate-50"
             style={{ fontFamily: 'Crimson Pro, serif' }}
           >
             Get in Touch
           </h1>
           <p className="text-lg text-slate-300 max-w-2xl mx-auto">
-            Interested in learning more about Starlight's tokenization platform? 
+            Interested in learning more about Starlight's tokenization platform?
             We'd love to hear from you.
           </p>
         </div>
@@ -78,20 +100,20 @@ export function Contact() {
         <div className="grid md:grid-cols-2 gap-8">
           {/* Contact Information */}
           <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 p-8 rounded-lg">
-            <h2 
+            <h2
               className="text-2xl mb-6 text-slate-50"
               style={{ fontFamily: 'Crimson Pro, serif' }}
             >
               Contact Information
             </h2>
-            
+
             <div className="space-y-6">
               <div className="flex items-start gap-4">
                 <Mail className="size-6 text-amber-400 mt-1 flex-shrink-0" strokeWidth={1.5} />
                 <div>
                   <h3 className="text-slate-200 mb-1">Email</h3>
-                  <a 
-                    href="mailto:info@starlightrwa.com" 
+                  <a
+                    href="mailto:info@starlightrwa.com"
                     className="text-slate-400 hover:text-amber-400 transition-colors"
                   >
                     info@starlightrwa.com
@@ -103,8 +125,8 @@ export function Contact() {
                 <Phone className="size-6 text-amber-400 mt-1 flex-shrink-0" strokeWidth={1.5} />
                 <div>
                   <h3 className="text-slate-200 mb-1">Phone</h3>
-                  <a 
-                    href="tel:+16045180642" 
+                  <a
+                    href="tel:+16045180642"
                     className="text-slate-400 hover:text-amber-400 transition-colors"
                   >
                     +1 (604) 518-0642
@@ -127,13 +149,13 @@ export function Contact() {
 
           {/* Contact Form */}
           <div className="bg-slate-900/60 backdrop-blur-xl border-t-2 border-t-amber-700 border border-slate-800 p-8 rounded-lg">
-            <h2 
+            <h2
               className="text-2xl mb-6 text-slate-50"
               style={{ fontFamily: 'Crimson Pro, serif' }}
             >
               Send a Message
             </h2>
-            
+
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div>
                 <label htmlFor="name" className="block text-sm mb-2 text-slate-300">
