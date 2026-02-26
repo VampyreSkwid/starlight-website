@@ -1,8 +1,22 @@
-import { Link, Outlet } from 'react-router';
+import { useEffect } from 'react';
+import { Link, Outlet, useLocation } from 'react-router';
 import { Footer } from './Footer';
 import starfieldBg from '@/assets/ffd952f562c92a4051c79af4bebb1d783d961e39.png';
 
 export function Root() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash === '#reserve') {
+      setTimeout(() => {
+        const element = document.getElementById('reserve');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, [location.pathname, location.hash]);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100 relative overflow-hidden">
       {/* Starfield background */}
