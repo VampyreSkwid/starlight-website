@@ -8,11 +8,15 @@ export function AdminDashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState<'registrations' | 'contacts'>('registrations');
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [passwordInput, setPasswordInput] = useState('');
+    const [loginError, setLoginError] = useState('');
 
     const isConfigured = Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY);
+    const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'Starlight2026!'; // Fallback for easier testing if they forget the variable
 
     useEffect(() => {
-        if (!isConfigured) {
+        if (!isConfigured || !isAuthenticated) {
             setLoading(false);
             return;
         }
@@ -37,8 +41,20 @@ export function AdminDashboard() {
             }
         };
 
-        fetchData();
-    }, [isConfigured]);
+        if (isAuthenticated) {
+            fetchData();
+        }
+    }, [isConfigured, isAuthenticated]);
+
+    const handleLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (passwordInput === adminPassword) {
+            setIsAuthenticated(true);
+            setLoginError('');
+        } else {
+            setLoginError('Incorrect password');
+        }
+    };
 
     if (!isConfigured) {
         return (
@@ -48,6 +64,39 @@ export function AdminDashboard() {
                 <p className="text-slate-300 max-w-xl mx-auto">
                     You need to add <code className="bg-slate-800 px-2 py-1 rounded">VITE_SUPABASE_URL</code> and <code className="bg-slate-800 px-2 py-1 rounded">VITE_SUPABASE_ANON_KEY</code> to your environment variables (in Cloudflare Pages settings or a local .env file) to view the admin dashboard.
                 </p>
+            </div>
+        );
+    }
+
+    if (!isAuthenticated) {
+        return (
+            <div className="container mx-auto px-4 py-24 max-w-md">
+                <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 p-8 rounded-lg shadow-xl shadow-black/50">
+                    <div className="text-center mb-8">
+                        <KeyRound className="size-12 text-amber-500 mx-auto mb-4" />
+                        <h1 className="text-3xl text-slate-50 mb-2" style={{ fontFamily: 'Crimson Pro, serif' }}>Admin Access</h1>
+                        <p className="text-slate-400 text-sm">Please enter the dashboard password to view submitted data.</p>
+                    </div>
+
+                    <form onSubmit={handleLogin} className="space-y-4">
+                        <div>
+                            <input
+                                type="password"
+                                value={passwordInput}
+                                onChange={(e) => setPasswordInput(e.target.value)}
+                                placeholder="Enter admin password"
+                                className="w-full bg-slate-950/50 border border-slate-700 rounded px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
+                            />
+                            {loginError && <p className="text-red-400 text-sm mt-2">{loginError}</p>}
+                        </div>
+                        <button
+                            type="submit"
+                            className="w-full bg-amber-600/20 border border-amber-500/50 text-amber-400 py-3 rounded hover:bg-amber-600 hover:text-slate-950 transition-all font-medium"
+                        >
+                            Access Dashboard
+                        </button>
+                    </form>
+                </div>
             </div>
         );
     }

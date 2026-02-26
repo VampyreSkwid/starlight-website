@@ -10,9 +10,10 @@ To securely store and view your form submissions in your own database (and use t
 
 ## 2. Connect Your Website
 1. Go to your **Cloudflare Pages Dashboard** -> `starlight-website` -> **Settings** -> **Environment variables**.
-2. Add these two variables (make sure the names match exactly):
+2. Add these three variables (make sure the names match exactly):
    - `VITE_SUPABASE_URL` = (Paste your Project URL)
    - `VITE_SUPABASE_ANON_KEY` = (Paste your Anon API Key)
+   - `VITE_ADMIN_PASSWORD` = (Type a strong password of your choice! E.g. `MySecurePass2026`)
 3. Click **Save** and trigger a new deployment (or just let GitHub push the next update).
 
 ## 3. Create Your Tables
