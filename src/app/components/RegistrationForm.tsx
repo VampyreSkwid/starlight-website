@@ -67,7 +67,7 @@ export function RegistrationForm() {
         let isSuccess = false;
 
         if (isSupabaseConfigured) {
-          const { error } = await supabase
+          let { error } = await supabase
             .from('registrations')
             .insert([
               {
@@ -76,12 +76,27 @@ export function RegistrationForm() {
                 title: formData.title,
                 email: formData.email,
                 asset_type: formData.assetType,
-                // Passing estimated_value here might fail if column doesn't exist,
-                // but we will try to pass it since it was requested in UI update.
-                // Assuming it's safe or can be added to the db.
-                ...(formData.estimatedValue && { estimated_value: formData.estimatedValue }),
+                estimated_value: formData.estimatedValue,
               }
             ]);
+
+          // If the database complains about the missing 'estimated_value' column (error 42703),
+          // fallback to the original schema to ensure submission completes.
+          if (error && error.code === '42703') {
+            console.warn('estimated_value column missing in DB. Falling back to old schema.');
+            const retry = await supabase
+              .from('registrations')
+              .insert([
+                {
+                  company_name: formData.companyName,
+                  contact_name: formData.contactName,
+                  title: formData.title,
+                  email: formData.email,
+                  asset_type: formData.assetType,
+                }
+              ]);
+            error = retry.error;
+          }
 
           if (error) throw error;
           isSuccess = true;
