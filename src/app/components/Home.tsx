@@ -143,7 +143,7 @@ export function Home() {
             We deliver on-chain compliance.
           </p>
           <p className="phil-statement font-playfair italic text-4xl md:text-6xl lg:text-7xl leading-tight">
-            You get: <span className="text-brand-accent">Secondary Trading & Deep Liquidity.</span>
+            You get: <span className="text-brand-accent">Secondary Trading<br /> & Deep Liquidity.</span>
           </p>
         </div>
       </section>
