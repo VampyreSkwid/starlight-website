@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle2, Shield } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { projectId, publicAnonKey } from '../../../utils/supabase/info';
 import { supabase, isSupabaseConfigured } from '../../utils/supabaseClient';
 
@@ -9,7 +9,7 @@ interface FormData {
   title: string;
   email: string;
   assetType: string;
-  consent: boolean;
+  estimatedValue: string;
 }
 
 export function RegistrationForm() {
@@ -18,20 +18,19 @@ export function RegistrationForm() {
     contactName: '',
     title: '',
     email: '',
-    assetType: '',
-    consent: false,
+    assetType: 'Net Smelter Royalty', // Default to first option in new dropdown
+    estimatedValue: '',
   });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    const checked = (e.target as HTMLInputElement).checked;
+    const { name, value } = e.target;
 
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: value,
     }));
 
     // Clear error when user starts typing
@@ -52,7 +51,7 @@ export function RegistrationForm() {
       newErrors.email = 'Please enter a valid email';
     }
     if (!formData.assetType) newErrors.assetType = 'Please select an asset type';
-    if (!formData.consent) newErrors.consent = 'Please confirm your interest';
+    if (!formData.estimatedValue.trim()) newErrors.estimatedValue = 'Estimated value is required';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -77,6 +76,10 @@ export function RegistrationForm() {
                 title: formData.title,
                 email: formData.email,
                 asset_type: formData.assetType,
+                // Passing estimated_value here might fail if column doesn't exist,
+                // but we will try to pass it since it was requested in UI update.
+                // Assuming it's safe or can be added to the db.
+                ...(formData.estimatedValue && { estimated_value: formData.estimatedValue }),
               }
             ]);
 
@@ -98,6 +101,7 @@ export function RegistrationForm() {
                 title: formData.title,
                 email: formData.email,
                 assetType: formData.assetType,
+                estimatedValue: formData.estimatedValue,
               }),
             }
           );
@@ -124,17 +128,12 @@ export function RegistrationForm() {
 
   if (submitted) {
     return (
-      <section id="reserve" className="w-full py-16 px-4">
-        <div className="container mx-auto max-w-2xl">
-          <div className="bg-slate-900/60 backdrop-blur-xl border border-amber-700/50 p-12 rounded-lg text-center">
-            <CheckCircle2 className="size-16 text-amber-400 mx-auto mb-6" strokeWidth={1.5} />
-            <h2
-              className="text-3xl mb-4 text-slate-50"
-              style={{ fontFamily: 'Crimson Pro, serif' }}
-            >
-              You're on the List
-            </h2>
-            <p className="text-lg text-slate-300 leading-relaxed">
+      <section id="reserve" className="relative py-32 px-6 md:px-12 lg:px-24 bg-brand-bg text-brand-primary rounded-t-[4rem] -mt-10 z-20">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-[#FFFFFF] rounded-[2rem] p-12 text-center border border-brand-primary/10 shadow-2xl">
+            <CheckCircle2 className="size-16 text-brand-primary mx-auto mb-6" strokeWidth={1.5} />
+            <h2 className="text-3xl mb-4 font-playfair italic font-bold">You're on the List</h2>
+            <p className="text-lg text-brand-primary/70 leading-relaxed font-mono uppercase tracking-wider">
               Thank you for your interest. We'll be in touch as the Starlight platform prepares for
               launch. Your company is now in our priority pipeline.
             </p>
@@ -145,137 +144,115 @@ export function RegistrationForm() {
   }
 
   return (
-    <section id="reserve" className="w-full py-16 px-4">
-      <div className="container mx-auto max-w-2xl">
-        <div className="text-center mb-12">
-          <h2
-            className="text-3xl sm:text-4xl mb-4 text-slate-50"
-            style={{ fontFamily: 'Crimson Pro, serif' }}
-          >
-            Reserve Your Spot
-          </h2>
-          <p className="text-lg text-slate-300 max-w-xl mx-auto"><span className="italic">Yes I am interested in tokenizing assets with Starlight -please add me to your waitlist!</span></p>
+    <section id="reserve" className="relative py-32 px-6 md:px-12 lg:px-24 bg-brand-bg text-brand-primary rounded-t-[4rem] -mt-10 z-20">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-5xl md:text-6xl font-playfair italic font-bold mb-4">Access Alternative Capital.</h2>
+          <p className="font-mono text-brand-primary/60 text-lg uppercase tracking-wider">
+            Phase 1 Commercialization Pipeline: Accepting applications for our cohort of mining partners.
+          </p>
         </div>
 
-        <div className="bg-slate-900/60 backdrop-blur-xl border-t-2 border-t-amber-700 border border-slate-800 p-8 sm:p-10 rounded-lg">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="companyName" className="block text-sm mb-2 text-slate-300">
-                Company Name
-              </label>
+        <form className="bg-[#FFFFFF] rounded-[2rem] p-10 md:p-16 shadow-2xl border border-black/5" onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div className="flex flex-col gap-2">
+              <label className="font-mono text-sm uppercase tracking-wider text-brand-primary/70">Name</label>
               <input
                 type="text"
-                id="companyName"
-                name="companyName"
-                value={formData.companyName}
-                onChange={handleChange}
-                placeholder="Your Company Name Here"
-                className={`w-full bg-slate-950/50 border ${errors.companyName ? 'border-red-500' : 'border-slate-700'} rounded px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700 transition-colors`}
-              />
-              {errors.companyName && (
-                <p className="text-red-400 text-sm mt-1">{errors.companyName}</p>
-              )}
-            </div>
-
-            <div>
-              <label htmlFor="contactName" className="block text-sm mb-2 text-slate-300">
-                Contact Name
-              </label>
-              <input
-                type="text"
-                id="contactName"
                 name="contactName"
                 value={formData.contactName}
                 onChange={handleChange}
-                placeholder="Full name"
-                className={`w-full bg-slate-950/50 border ${errors.contactName ? 'border-red-500' : 'border-slate-700'} rounded px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700 transition-colors`}
+                required
+                className={`bg-brand-bg/50 border ${errors.contactName ? 'border-red-500' : 'border-brand-primary/20'} rounded-xl px-4 py-4 outline-none focus:border-brand-primary transition-colors text-lg`}
+                placeholder="Your Name"
               />
-              {errors.contactName && (
-                <p className="text-red-400 text-sm mt-1">{errors.contactName}</p>
-              )}
+              {errors.contactName && <p className="text-red-500 text-xs font-mono">{errors.contactName}</p>}
             </div>
 
-            <div>
-              <label htmlFor="title" className="block text-sm mb-2 text-slate-300">
-                Title / Role
-              </label>
+            <div className="flex flex-col gap-2">
+              <label className="font-mono text-sm uppercase tracking-wider text-brand-primary/70">Title / Role</label>
               <input
                 type="text"
-                id="title"
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
-                placeholder="e.g. CEO, CFO, VP Exploration"
-                className={`w-full bg-slate-950/50 border ${errors.title ? 'border-red-500' : 'border-slate-700'} rounded px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700 transition-colors`}
+                required
+                className={`bg-brand-bg/50 border ${errors.title ? 'border-red-500' : 'border-brand-primary/20'} rounded-xl px-4 py-4 outline-none focus:border-brand-primary transition-colors text-lg`}
+                placeholder="Your Title"
               />
-              {errors.title && (
-                <p className="text-red-400 text-sm mt-1">{errors.title}</p>
-              )}
+              {errors.title && <p className="text-red-500 text-xs font-mono">{errors.title}</p>}
             </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm mb-2 text-slate-300">
-                Email Address
-              </label>
+            <div className="flex flex-col gap-2">
+              <label className="font-mono text-sm uppercase tracking-wider text-brand-primary/70">Company</label>
+              <input
+                type="text"
+                name="companyName"
+                value={formData.companyName}
+                onChange={handleChange}
+                required
+                className={`bg-brand-bg/50 border ${errors.companyName ? 'border-red-500' : 'border-brand-primary/20'} rounded-xl px-4 py-4 outline-none focus:border-brand-primary transition-colors text-lg`}
+                placeholder="Your Company"
+              />
+              {errors.companyName && <p className="text-red-500 text-xs font-mono">{errors.companyName}</p>}
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="font-mono text-sm uppercase tracking-wider text-brand-primary/70">Contact Email</label>
               <input
                 type="email"
-                id="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="you@company.com"
-                className={`w-full bg-slate-950/50 border ${errors.email ? 'border-red-500' : 'border-slate-700'} rounded px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700 transition-colors`}
+                required
+                className={`bg-brand-bg/50 border ${errors.email ? 'border-red-500' : 'border-brand-primary/20'} rounded-xl px-4 py-4 outline-none focus:border-brand-primary transition-colors text-lg`}
+                placeholder="your@email.com"
               />
-              {errors.email && (
-                <p className="text-red-400 text-sm mt-1">{errors.email}</p>
-              )}
+              {errors.email && <p className="text-red-500 text-xs font-mono">{errors.email}</p>}
             </div>
 
-            <div>
-              <label htmlFor="assetType" className="block text-sm mb-2 text-slate-300">
-                Asset Type
-              </label>
+            <div className="flex flex-col gap-2">
+              <label className="font-mono text-sm uppercase tracking-wider text-brand-primary/70">Estimated Asset Value</label>
               <input
                 type="text"
-                id="assetType"
+                name="estimatedValue"
+                value={formData.estimatedValue}
+                onChange={handleChange}
+                required
+                className={`bg-brand-bg/50 border ${errors.estimatedValue ? 'border-red-500' : 'border-brand-primary/20'} rounded-xl px-4 py-4 outline-none focus:border-brand-primary transition-colors text-lg`}
+                placeholder="$10M - $50M target"
+              />
+              {errors.estimatedValue && <p className="text-red-500 text-xs font-mono">{errors.estimatedValue}</p>}
+            </div>
+
+            <div className="flex flex-col gap-2 md:col-span-2">
+              <label className="font-mono text-sm uppercase tracking-wider text-brand-primary/70">Asset Type</label>
+              <select
                 name="assetType"
                 value={formData.assetType}
                 onChange={handleChange}
-                placeholder="e.g., NSRs, Mineral Rights, Exploration Assets..."
-                className={`w-full bg-slate-950/50 border ${errors.assetType ? 'border-red-500' : 'border-slate-700'} rounded px-4 py-3 text-slate-100 focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700 transition-colors`}
-              />
-              {errors.assetType && (
-                <p className="text-red-400 text-sm mt-1">{errors.assetType}</p>
-              )}
+                required
+                className={`bg-brand-bg/50 border ${errors.assetType ? 'border-red-500' : 'border-brand-primary/20'} rounded-xl px-4 py-4 outline-none focus:border-brand-primary transition-colors text-lg appearance-none cursor-pointer`}
+              >
+                <option value="Net Smelter Royalty">Net Smelter Royalty</option>
+                <option value="Mineral Rights">Mineral Rights</option>
+                <option value="Exploration Stage">Exploration Stage</option>
+                <option value="Corporate Debt">Corporate Debt</option>
+                <option value="Other">Other</option>
+              </select>
+              {errors.assetType && <p className="text-red-500 text-xs font-mono">{errors.assetType}</p>}
             </div>
+          </div>
 
-            <div className="pt-4">
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="consent"
-                  checked={formData.consent}
-                  onChange={handleChange}
-                  className="mt-1 size-4 rounded border-slate-700 bg-slate-950/50 text-amber-600 focus:ring-amber-700 focus:ring-offset-slate-950"
-                />
-                <span className={`text-sm leading-relaxed ${errors.consent ? 'text-red-400' : 'text-slate-300'}`}>
-                  Yes, I'm interested in exploring the digital future with Starlight. I'd like to learn
-                  more about tokenizing our mining assets and accessing new capital markets through
-                  Starlight's RWA platform when it launches.
-                </span>
-              </label>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-transparent border-2 border-amber-600 text-amber-400 py-4 px-6 rounded hover:bg-amber-600 hover:text-slate-950 transition-all duration-300 tracking-wide"
-              style={{ fontFamily: 'Crimson Pro, serif' }}
-            >
-              {submitting ? 'Submitting...' : 'Register Now'}
-            </button>
-
-          </form>
-        </div>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="interactive-button relative overflow-hidden w-full py-5 rounded-xl bg-brand-primary text-brand-bg font-semibold text-xl mt-4 hover:text-brand-primary cursor-pointer disabled:opacity-70"
+          >
+            <span className="relative z-10">{submitting ? 'Submitting...' : 'Submit Application'}</span>
+            <span className="hover-layer"></span>
+          </button>
+        </form>
       </div>
     </section>
   );

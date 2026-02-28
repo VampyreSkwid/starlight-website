@@ -1,13 +1,13 @@
-import { Mail, MapPin, Phone, CheckCircle2 } from 'lucide-react';
 import { useState } from 'react';
 import { projectId, publicAnonKey } from '../../../utils/supabase/info';
 import { supabase, isSupabaseConfigured } from '../../utils/supabaseClient';
+import { CheckCircle2 } from 'lucide-react';
 
 export function Contact() {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: '',
+    contact_name: '',
+    contact_email: '',
+    contact_message: '',
   });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -17,8 +17,7 @@ export function Contact() {
     e.preventDefault();
     setError('');
 
-    // Basic validation
-    if (!formData.name || !formData.email || !formData.message) {
+    if (!formData.contact_name || !formData.contact_email || !formData.contact_message) {
       setError('Please fill in all fields');
       return;
     }
@@ -28,16 +27,17 @@ export function Contact() {
     try {
       let isSuccess = false;
 
+      // Map our new form keys to the Supabase expected keys
+      const payload = {
+        name: formData.contact_name,
+        email: formData.contact_email,
+        message: formData.contact_message,
+      };
+
       if (isSupabaseConfigured) {
         const { error: dbError } = await supabase
           .from('contacts')
-          .insert([
-            {
-              name: formData.name,
-              email: formData.email,
-              message: formData.message,
-            }
-          ]);
+          .insert([payload]);
 
         if (dbError) throw dbError;
         isSuccess = true;
@@ -50,7 +50,7 @@ export function Contact() {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${publicAnonKey}`,
             },
-            body: JSON.stringify(formData),
+            body: JSON.stringify(payload),
           }
         );
 
@@ -82,147 +82,97 @@ export function Contact() {
   };
 
   return (
-    <section className="w-full py-16 px-4">
-      <div className="container mx-auto max-w-4xl">
-        <div className="text-center mb-12">
-          <h1
-            className="text-4xl sm:text-5xl mb-6 text-slate-50"
-            style={{ fontFamily: 'Crimson Pro, serif' }}
-          >
-            Get in Touch
-          </h1>
-          <p className="text-lg text-slate-300 max-w-2xl mx-auto">
-            Interested in learning more about Starlight's tokenization platform?
-            We'd love to hear from you.
-          </p>
+    <div className="min-h-screen bg-[#050508] font-inter">
+      {/* Contact Hero Section */}
+      <section className="relative h-[60dvh] w-full flex items-end pb-24 px-8 md:px-16 lg:px-24">
+        {/* Background Image with Gradient Overlay */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/contact_hero_vancouver.png"
+            alt="Global communication network centered on Vancouver"
+            className="w-full h-full object-cover opacity-80"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-[#050508]/40 to-transparent"></div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Contact Information */}
-          <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 p-8 rounded-lg">
-            <h2
-              className="text-2xl mb-6 text-slate-50"
-              style={{ fontFamily: 'Crimson Pro, serif' }}
-            >
-              Contact Information
-            </h2>
+        {/* Content */}
+        <div className="relative z-10 max-w-4xl w-full">
+          <h1 className="hero-text text-xl md:text-2xl font-semibold tracking-tight uppercase text-brand-bg/80 mb-2">Global Connectivity</h1>
+          <h2 className="hero-text text-5xl md:text-7xl lg:text-8xl leading-[0.9] tracking-tight mb-4">
+            <span className="block font-bold mb-2 text-white">Initial Contact.</span>
+          </h2>
+          <p className="hero-text text-lg md:text-xl text-brand-bg/70 max-w-2xl font-mono leading-relaxed text-white">
+            For general inquiries, strategic partnerships, and press.
+          </p>
+        </div>
+      </section>
 
-            <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <Mail className="size-6 text-amber-400 mt-1 flex-shrink-0" strokeWidth={1.5} />
-                <div>
-                  <h3 className="text-slate-200 mb-1">Email</h3>
-                  <a
-                    href="mailto:info@starlightrwa.com"
-                    className="text-slate-400 hover:text-amber-400 transition-colors"
-                  >
-                    info@starlightrwa.com
-                  </a>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <Phone className="size-6 text-amber-400 mt-1 flex-shrink-0" strokeWidth={1.5} />
-                <div>
-                  <h3 className="text-slate-200 mb-1">Phone</h3>
-                  <a
-                    href="tel:+16045180642"
-                    className="text-slate-400 hover:text-amber-400 transition-colors"
-                  >
-                    +1 (604) 518-0642
-                  </a>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <MapPin className="size-6 text-amber-400 mt-1 flex-shrink-0" strokeWidth={1.5} />
-                <div>
-                  <h3 className="text-slate-200 mb-1">Location</h3>
-                  <p className="text-slate-400">
-                    Vancouver, BC<br />
-                    Canada
-                  </p>
-                </div>
-              </div>
+      {/* Form Section */}
+      <section id="contact" className="relative w-full py-16 px-6 md:px-12 lg:px-24 z-20">
+        <div className="max-w-4xl mx-auto">
+          {submitted ? (
+            <div className="bg-brand-dark/30 backdrop-blur-md rounded-[2rem] p-12 text-center border border-brand-accent/50 shadow-2xl">
+              <CheckCircle2 className="size-16 text-brand-accent mx-auto mb-6" strokeWidth={1.5} />
+              <h2 className="text-3xl mb-4 font-playfair italic font-bold text-white">Message Received</h2>
+              <p className="text-lg text-brand-bg/70 leading-relaxed font-mono uppercase tracking-wider">
+                We will be in touch shortly.
+              </p>
             </div>
-          </div>
-
-          {/* Contact Form */}
-          <div className="bg-slate-900/60 backdrop-blur-xl border-t-2 border-t-amber-700 border border-slate-800 p-8 rounded-lg">
-            <h2
-              className="text-2xl mb-6 text-slate-50"
-              style={{ fontFamily: 'Crimson Pro, serif' }}
-            >
-              Send a Message
-            </h2>
-
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <div>
-                <label htmlFor="name" className="block text-sm mb-2 text-slate-300">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  placeholder="Your name"
-                  className="w-full bg-slate-950/50 border border-slate-700 rounded px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700 transition-colors"
-                  value={formData.name}
-                  onChange={handleChange}
-                />
+          ) : (
+            <form className="bg-brand-dark/30 backdrop-blur-md rounded-[2rem] p-6 md:p-16 shadow-2xl border border-brand-dark" onSubmit={handleSubmit}>
+              <div className="grid grid-cols-1 gap-8 mb-8">
+                <div className="flex flex-col gap-2">
+                  <label className="font-mono text-sm uppercase tracking-wider text-brand-bg/70 text-white">Name</label>
+                  <input
+                    type="text"
+                    name="contact_name"
+                    value={formData.contact_name}
+                    onChange={handleChange}
+                    required
+                    className="bg-[#050508]/50 border border-brand-dark rounded-xl px-4 py-4 outline-none focus:border-brand-accent transition-colors text-lg text-white"
+                    placeholder="Your Name"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="font-mono text-sm uppercase tracking-wider text-brand-bg/70 text-white">Contact Email</label>
+                  <input
+                    type="email"
+                    name="contact_email"
+                    value={formData.contact_email}
+                    onChange={handleChange}
+                    required
+                    className="bg-[#050508]/50 border border-brand-dark rounded-xl px-4 py-4 outline-none focus:border-brand-accent transition-colors text-lg text-white"
+                    placeholder="your@email.com"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="font-mono text-sm uppercase tracking-wider text-brand-bg/70 text-white">Message</label>
+                  <textarea
+                    name="contact_message"
+                    value={formData.contact_message}
+                    onChange={handleChange}
+                    required
+                    rows={4}
+                    className="bg-[#050508]/50 border border-brand-dark rounded-xl px-4 py-4 outline-none focus:border-brand-accent transition-colors text-lg text-white resize-none"
+                    placeholder="How can we help you?"
+                  ></textarea>
+                </div>
               </div>
 
-              <div>
-                <label htmlFor="email" className="block text-sm mb-2 text-slate-300">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  placeholder="you@company.com"
-                  className="w-full bg-slate-950/50 border border-slate-700 rounded px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700 transition-colors"
-                  value={formData.email}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div>
-                <label htmlFor="message" className="block text-sm mb-2 text-slate-300">
-                  Message
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  rows={4}
-                  placeholder="Tell us about your project..."
-                  className="w-full bg-slate-950/50 border border-slate-700 rounded px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700 transition-colors resize-none"
-                  value={formData.message}
-                  onChange={handleChange}
-                />
-              </div>
-
-              {error && <p className="text-red-500 text-sm">{error}</p>}
+              {error && <p className="text-red-500 text-sm mb-4 font-mono">{error}</p>}
 
               <button
                 type="submit"
-                className="w-full bg-transparent border-2 border-amber-600 text-amber-400 py-3 px-6 rounded hover:bg-amber-600 hover:text-slate-950 transition-all duration-300 tracking-wide"
-                style={{ fontFamily: 'Crimson Pro, serif' }}
                 disabled={submitting}
+                className="interactive-button relative overflow-hidden w-full py-5 rounded-xl bg-brand-accent text-brand-primary font-semibold text-xl mt-4 hover:text-brand-bg cursor-pointer disabled:opacity-70"
               >
-                {submitting ? 'Sending...' : 'Send Message'}
+                <span className="relative z-10">{submitting ? 'Sending...' : 'Send Message'}</span>
+                <span className="hover-layer"></span>
               </button>
-
-              {submitted && (
-                <div className="mt-4 text-green-500 flex items-center">
-                  <CheckCircle2 className="size-5 mr-2" />
-                  Message sent successfully!
-                </div>
-              )}
             </form>
-          </div>
+          )}
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }
