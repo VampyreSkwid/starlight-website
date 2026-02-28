@@ -140,10 +140,10 @@ export function Home() {
         </div>
         <div className="relative z-10 max-w-5xl mx-auto px-6 md:px-12 text-center">
           <p className="phil-statement font-inter text-xl md:text-2xl text-brand-bg/50 mb-6 uppercase tracking-widest">
-            We enable on-chain compliance.
+            We deliver on-chain compliance.
           </p>
           <p className="phil-statement font-playfair italic text-4xl md:text-6xl lg:text-7xl leading-tight">
-            You get: <span className="text-brand-accent">Secondary Trading and Deep Liquidity.</span>
+            You get: <span className="text-brand-accent">Secondary Trading & Deep Liquidity.</span>
           </p>
         </div>
       </section>
