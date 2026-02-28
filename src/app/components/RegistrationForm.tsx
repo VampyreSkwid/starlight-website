@@ -80,9 +80,9 @@ export function RegistrationForm() {
               }
             ]);
 
-          // If the database complains about the missing 'estimated_value' column (error 42703),
+          // If the database complains about the missing 'estimated_value' column (error 42703 or PGRST204),
           // fallback to the original schema to ensure submission completes.
-          if (error && error.code === '42703') {
+          if (error && (error.code === '42703' || error.code === 'PGRST204')) {
             console.warn('estimated_value column missing in DB. Falling back to old schema.');
             const retry = await supabase
               .from('registrations')
