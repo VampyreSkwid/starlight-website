@@ -28,23 +28,23 @@ app.get("/make-server-1da2e686/health", (c) => {
 app.post("/make-server-1da2e686/submit-registration", async (c) => {
   try {
     const body = await c.req.json();
-    
+
     // Validate required fields
-    const { companyName, contactName, title, email, assetType } = body;
-    
+    const { companyName, contactName, title, email, assetType, estimatedValue } = body;
+
     if (!companyName || !contactName || !title || !email || !assetType) {
       return c.json({ error: "Missing required fields" }, 400);
     }
-    
+
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return c.json({ error: "Invalid email format" }, 400);
     }
-    
+
     // Create a unique ID for this submission
     const submissionId = `registration_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     // Store the submission with timestamp
     const submission = {
       id: submissionId,
@@ -53,17 +53,18 @@ app.post("/make-server-1da2e686/submit-registration", async (c) => {
       title,
       email,
       assetType,
+      estimatedValue,
       submittedAt: new Date().toISOString(),
     };
-    
+
     await kv.set(submissionId, submission);
-    
+
     console.log(`Registration submitted successfully: ${email} from ${companyName}`);
-    
-    return c.json({ 
-      success: true, 
+
+    return c.json({
+      success: true,
       message: "Registration submitted successfully",
-      submissionId 
+      submissionId
     });
   } catch (error) {
     console.error("Error submitting registration:", error);
@@ -75,23 +76,23 @@ app.post("/make-server-1da2e686/submit-registration", async (c) => {
 app.post("/make-server-1da2e686/submit-contact", async (c) => {
   try {
     const body = await c.req.json();
-    
+
     // Validate required fields
     const { name, email, message } = body;
-    
+
     if (!name || !email || !message) {
       return c.json({ error: "Missing required fields" }, 400);
     }
-    
+
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return c.json({ error: "Invalid email format" }, 400);
     }
-    
+
     // Create a unique ID for this submission
     const submissionId = `contact_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     // Store the submission with timestamp
     const submission = {
       id: submissionId,
@@ -100,15 +101,15 @@ app.post("/make-server-1da2e686/submit-contact", async (c) => {
       message,
       submittedAt: new Date().toISOString(),
     };
-    
+
     await kv.set(submissionId, submission);
-    
+
     console.log(`Contact form submitted successfully: ${email} - ${name}`);
-    
-    return c.json({ 
-      success: true, 
+
+    return c.json({
+      success: true,
       message: "Contact form submitted successfully",
-      submissionId 
+      submissionId
     });
   } catch (error) {
     console.error("Error submitting contact form:", error);
@@ -120,16 +121,16 @@ app.post("/make-server-1da2e686/submit-contact", async (c) => {
 app.get("/make-server-1da2e686/registrations", async (c) => {
   try {
     const registrations = await kv.getByPrefix("registration_");
-    
+
     // Sort by submission date (newest first)
     const sorted = registrations.sort((a, b) => {
       return new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime();
     });
-    
-    return c.json({ 
-      success: true, 
+
+    return c.json({
+      success: true,
       count: registrations.length,
-      registrations: sorted 
+      registrations: sorted
     });
   } catch (error) {
     console.error("Error fetching registrations:", error);
