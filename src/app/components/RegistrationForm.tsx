@@ -228,15 +228,24 @@ export function RegistrationForm() {
 
             <div className="flex flex-col gap-2">
               <label className="font-mono text-sm uppercase tracking-wider text-brand-primary/70">Estimated Asset Value</label>
-              <input
-                type="text"
-                name="estimatedValue"
-                value={formData.estimatedValue}
-                onChange={handleChange}
-                required
-                className={`bg-brand-bg/50 border ${errors.estimatedValue ? 'border-red-500' : 'border-brand-primary/20'} rounded-xl px-4 py-4 outline-none focus:border-brand-primary transition-colors text-lg`}
-                placeholder="$10M - $50M target"
-              />
+              <div className="relative">
+                <select
+                  name="estimatedValue"
+                  value={formData.estimatedValue}
+                  onChange={handleChange}
+                  required
+                  className={`w-full bg-brand-bg/50 border ${errors.estimatedValue ? 'border-red-500' : 'border-brand-primary/20'} rounded-xl px-4 py-4 outline-none focus:border-brand-primary transition-colors text-lg appearance-none cursor-pointer`}
+                >
+                  <option value="" disabled>Select estimated value...</option>
+                  <option value="Under $10M">Under $10M</option>
+                  <option value="$10M - $50M">$10M - $50M</option>
+                  <option value="$50M - $100M">$50M - $100M</option>
+                  <option value="$100M+">$100M+</option>
+                </select>
+                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+                  <svg className="w-5 h-5 text-brand-primary/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+              </div>
               {errors.estimatedValue && <p className="text-red-500 text-xs font-mono">{errors.estimatedValue}</p>}
             </div>
 
